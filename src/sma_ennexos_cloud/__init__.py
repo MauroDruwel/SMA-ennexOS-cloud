@@ -1,5 +1,5 @@
 """
-SMA ennexOS Python Library
+SMA ennexOS Cloud Python Library
 
 A Python library for interacting with SMA ennexOS / Sunny Portal using
 PKCE OAuth2 (no browser required).

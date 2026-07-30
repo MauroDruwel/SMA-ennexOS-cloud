@@ -1,7 +1,7 @@
 import pytest
 
-from sma_ennexos import SmaClient
-from sma_ennexos.exceptions import AuthenticationError
+from sma_ennexos_cloud import SmaClient
+from sma_ennexos_cloud.exceptions import AuthenticationError
 
 
 class TestSmaClient:

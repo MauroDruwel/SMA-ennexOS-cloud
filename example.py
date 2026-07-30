@@ -3,7 +3,7 @@ import json
 import sys
 import time
 
-from sma_ennexos import SmaClient
+from sma_ennexos_cloud import SmaClient
 
 
 def main():

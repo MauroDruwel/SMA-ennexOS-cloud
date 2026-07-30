@@ -1,8 +1,8 @@
 import pytest
 import requests
 
-from sma_ennexos.auth import _parse_form_action, login, refresh_access_token
-from sma_ennexos import SmaClient
+from sma_ennexos_cloud.auth import _parse_form_action, login, refresh_access_token
+from sma_ennexos_cloud import SmaClient
 
 
 class TestParseFormAction:

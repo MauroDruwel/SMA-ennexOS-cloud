@@ -3,7 +3,7 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "sma_ennexos"
+name = "sma_ennexos_cloud"
 dynamic = ["version"]
 description = "Python library for SMA ennexOS / Sunny Portal"
 readme = "README.md"
@@ -44,7 +44,7 @@ dev = [
 where = ["src"]
 
 [tool.setuptools.dynamic]
-version = { attr = "sma_ennexos.__version__" }
+version = { attr = "sma_ennexos_cloud.__version__" }
 
 [tool.ruff]
 line-length = 100
@@ -55,6 +55,15 @@ select = ["E", "F", "I", "N", "W", "UP"]
 
 [tool.ruff.format]
 quote-style = "double"
+
+[tool.coverage.run]
+source = ["sma_ennexos_cloud"]
+omit = ["tests/*"]
+
+[tool.coverage.report]
+show_missing = true
+skip_empty = false
+fail_under = 80
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

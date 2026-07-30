@@ -1,4 +1,4 @@
-from sma_ennexos.models import EnergyData, PlantInfo, PowerData
+from sma_ennexos_cloud.models import EnergyData, PlantInfo, PowerData
 
 
 class TestPowerData:

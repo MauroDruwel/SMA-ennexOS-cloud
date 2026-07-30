@@ -1,6 +1,6 @@
 import pytest
 
-from sma_ennexos.utils import _asdict, _b64url, generate_pkce, random_str
+from sma_ennexos_cloud.utils import _asdict, _b64url, generate_pkce, random_str
 
 
 class TestBase64:

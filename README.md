@@ -8,13 +8,13 @@ Uses PKCE OAuth2 to authenticate and provides typed access to PV plant data
 ## Installation
 
 ```bash
-pip install sma_ennexos
+pip install sma_ennexos_cloud
 ```
 
 ## Usage
 
 ```python
-from sma_ennexos import SmaClient
+from sma_ennexos_cloud import SmaClient
 
 client = SmaClient(username="your@email.com", password="your-password")
 client.login()
