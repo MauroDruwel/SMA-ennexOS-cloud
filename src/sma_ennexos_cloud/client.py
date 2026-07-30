@@ -1,15 +1,15 @@
 """Main client for the SMA ennexOS / Sunny Portal API."""
+
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
-from typing import Optional
 
 import requests
 
 from .auth import login, refresh_access_token
-from .constants import API_BASE, API_REQUEST_HEADERS, BROWSER_HEADERS, CLIENT_ID, TOKEN_URL
-from .exceptions import APIError, AuthenticationError
-from .models import EnergyData, PlantInfo, PowerData
+from .constants import API_BASE, API_REQUEST_HEADERS, BROWSER_HEADERS
+from .exceptions import AuthenticationError
+from .models import EnergyData, PowerData
 
 
 class SmaClient:
@@ -24,10 +24,10 @@ class SmaClient:
         self.password = password
         self._http = requests.Session()
         self._http.headers.update(BROWSER_HEADERS)
-        self.access_token: Optional[str] = None
-        self.refresh_token: Optional[str] = None
-        self.component_id: Optional[str] = None
-        self._plant_name: Optional[str] = None
+        self.access_token: str | None = None
+        self.refresh_token: str | None = None
+        self.component_id: str | None = None
+        self._plant_name: str | None = None
 
     def login(self) -> None:
         if not self.username or not self.password:

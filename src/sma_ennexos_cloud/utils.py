@@ -32,8 +32,7 @@ def _asdict(instance: Any) -> dict[str, Any]:
             result[field_name] = value.to_dict()
         elif isinstance(value, list):
             result[field_name] = [
-                item.to_dict() if hasattr(item, "to_dict") else item
-                for item in value
+                item.to_dict() if hasattr(item, "to_dict") else item for item in value
             ]
         else:
             result[field_name] = value

@@ -1,11 +1,10 @@
 """PKCE OAuth2 authentication for SMA ennexOS / Sunny Portal."""
+
 from __future__ import annotations
 
 import re
 import urllib.parse
 from typing import TYPE_CHECKING
-
-from requests import Session
 
 from .constants import (
     AUTH_PAGE_HEADERS,
@@ -63,17 +62,13 @@ def login(client: SmaClient) -> None:
 
     location = r2.headers.get("Location")
     if not location:
-        raise AuthenticationError(
-            "No redirect after login – check credentials"
-        )
+        raise AuthenticationError("No redirect after login – check credentials")
 
     parsed = urllib.parse.urlparse(location)
     qs = urllib.parse.parse_qs(parsed.query)
     auth_code = qs.get("code", [None])[0]
     if not auth_code:
-        raise AuthenticationError(
-            f"No auth code in redirect URL: {location}"
-        )
+        raise AuthenticationError(f"No auth code in redirect URL: {location}")
 
     r3 = session.post(
         TOKEN_URL,
