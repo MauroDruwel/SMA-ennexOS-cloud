@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "sma_ennexos_cloud"
 dynamic = ["version"]
-description = "Python library for SMA ennexOS / Sunny Portal"
+description = "Python library for SMA ennexOS / Sunny Portal (PKCE OAuth2, no browser)"
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.9"
@@ -29,9 +29,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/MauroDruwel/SMA-ennexOS"
-Repository = "https://github.com/MauroDruwel/SMA-ennexOS"
-Issues = "https://github.com/MauroDruwel/SMA-ennexOS/issues"
+Homepage = "https://github.com/MauroDruwel/SMA-ennexOS-cloud"
+Repository = "https://github.com/MauroDruwel/SMA-ennexOS-cloud"
+Issues = "https://github.com/MauroDruwel/SMA-ennexOS-cloud/issues"
 
 [project.optional-dependencies]
 dev = [
