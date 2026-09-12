@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from sma_ennexos_cloud.models import EnergyData, PlantInfo, PowerData
 
 

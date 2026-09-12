@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from sma_ennexos_cloud.utils import _asdict, _b64url, generate_pkce, random_str
 
 
