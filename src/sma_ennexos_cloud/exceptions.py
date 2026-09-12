@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+
 class SmaError(Exception):
     """Base exception for SMA ennexOS library."""
 
