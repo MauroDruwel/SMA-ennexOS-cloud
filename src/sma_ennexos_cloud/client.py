@@ -9,7 +9,7 @@ import requests
 from .auth import login, refresh_access_token
 from .constants import API_BASE, API_REQUEST_HEADERS, BROWSER_HEADERS
 from .exceptions import AuthenticationError
-from .models import EnergyData, PowerData
+from .models import EnergyData, PlantInfo, PowerData
 
 
 class SmaClient:
@@ -19,6 +19,7 @@ class SmaClient:
         self,
         username: str | None = None,
         password: str | None = None,
+        component_id: str | None = None,
     ) -> None:
         self.username = username
         self.password = password
@@ -26,7 +27,7 @@ class SmaClient:
         self._http.headers.update(BROWSER_HEADERS)
         self.access_token: str | None = None
         self.refresh_token: str | None = None
-        self.component_id: str | None = None
+        self.component_id: str | None = str(component_id) if component_id is not None else None
         self._plant_name: str | None = None
 
     def login(self) -> None:
@@ -78,11 +79,40 @@ class SmaClient:
         r.raise_for_status()
         return r
 
-    def discover_plant(self) -> str:
+    def get_plants(self) -> list[PlantInfo]:
+        """Return a list of all plants available to this account."""
         nav = self._get("/navigation").json()
-        plant_id = nav[0]["componentId"] if isinstance(nav, list) else nav["componentId"]
-        self.component_id = str(plant_id)
+        if isinstance(nav, dict):
+            nav = [nav]
+        plants: list[PlantInfo] = []
+        for item in nav:
+            is_plant = item.get("componentType") == "Plant"
+            has_id_only = "componentType" not in item and "componentId" in item
+            if is_plant or has_id_only:
+                plants.append(
+                    PlantInfo(
+                        component_id=str(item["componentId"]),
+                        name=item.get("name") or str(item["componentId"]),
+                    )
+                )
+        return plants
+
+    def discover_plant(self) -> str:
+        """Discover the default plant if component_id is not already set."""
+        if self.component_id:
+            return self.component_id
+        plants = self.get_plants()
+        if not plants:
+            raise ValueError("No plants found for this account")
+        self.component_id = plants[0].component_id
+        self._plant_name = plants[0].name
         return self.component_id
+
+    def set_plant(self, component_id: str, name: str | None = None) -> None:
+        """Set the active plant component_id."""
+        self.component_id = str(component_id)
+        if name:
+            self._plant_name = name
 
     def get_current_power(self) -> PowerData:
         if not self.component_id:
@@ -101,6 +131,8 @@ class SmaClient:
         )
 
     def get_plant_name(self) -> str:
+        if self._plant_name:
+            return self._plant_name
         if not self.component_id:
             self.discover_plant()
         r = self._get(f"/plants/{self.component_id}")

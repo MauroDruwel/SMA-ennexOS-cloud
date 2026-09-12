@@ -1,5 +1,3 @@
-import pytest
-
 from sma_ennexos_cloud.utils import _asdict, _b64url, generate_pkce, random_str
 
 
