@@ -55,8 +55,10 @@ status = client.get_live_data_status()  # "operational" or "under_maintenance"
 | `get_current_power()` | `PowerData` | Live PV power in watts |
 | `get_daily_energy()` | `EnergyData` | Today's total energy in Wh |
 | `get_plant_name()` | `str` | Name of your PV plant |
+| `get_weather()` | `WeatherData` | Weather conditions, temperature, and tomorrow's forecast |
 | `get_live_data_status(force_refresh=False)` | `str` | Live Data status (`operational`, `under_maintenance`, etc.) |
 | `close()` | — | Close HTTP session |
+
 
 ## Standalone Functions
 

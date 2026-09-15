@@ -10,7 +10,7 @@ import requests
 from .auth import login, refresh_access_token
 from .constants import API_BASE, API_REQUEST_HEADERS, BROWSER_HEADERS
 from .exceptions import AuthenticationError
-from .models import EnergyData, PlantInfo, PortalStatus, PowerData
+from .models import EnergyData, PlantInfo, PortalStatus, PowerData, WeatherData
 from .status import get_live_data_status
 
 _LOGGER = logging.getLogger(__name__)
@@ -213,5 +213,29 @@ class SmaClient:
             return PortalStatus(live_data_status=self._live_data_status)
         return None
 
+    def get_weather(
+        self,
+        component_id: str | None = None,
+        start_today_utc: str | None = None,
+    ) -> WeatherData:
+        """Fetch current weather and tomorrow's forecast for the plant."""
+        cid = component_id or self.component_id
+        if not cid:
+            cid = self.discover_plant()
+
+        if start_today_utc is None:
+            now_local = datetime.now().astimezone()
+            start_today = now_local.replace(hour=0, minute=0, second=0, microsecond=0)
+            start_today_utc = (
+                start_today.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+            )
+
+        r = self._get(
+            f"/components/{cid}/forecast/weather",
+            params={"startTodayUtc": start_today_utc},
+        )
+        return WeatherData.from_dict(r.json())
+
     def close(self) -> None:
         self._http.close()
+
