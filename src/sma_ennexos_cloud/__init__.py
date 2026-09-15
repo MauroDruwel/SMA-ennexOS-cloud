@@ -45,4 +45,3 @@ __all__ = [
     "get_portal_status",
     "normalize_weather_icon_id",
 ]
-

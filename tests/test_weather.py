@@ -188,9 +188,7 @@ class TestClientWeather:
 
         monkeypatch.setattr(client, "_get", fake_get)
 
-
         weather = client.get_weather()
         assert weather.city == "Ghent"
         assert client.component_id == "discovered_123"
         assert called[0] == "/components/discovered_123/forecast/weather"
-

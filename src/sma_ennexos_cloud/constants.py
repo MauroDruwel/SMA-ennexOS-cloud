@@ -153,4 +153,3 @@ WEATHER_CONDITION_MAP: dict[int, str] = {
 def normalize_weather_icon_id(icon_id: int) -> int:
     """Normalize weather icon ID (e.g. 100+ mapped modulo 100 per SMA ennexOS web app)."""
     return icon_id % 100 if icon_id >= 100 else icon_id
-

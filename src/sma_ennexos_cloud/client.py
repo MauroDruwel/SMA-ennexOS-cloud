@@ -226,8 +226,8 @@ class SmaClient:
         if start_today_utc is None:
             now_local = datetime.now().astimezone()
             start_today = now_local.replace(hour=0, minute=0, second=0, microsecond=0)
-            start_today_utc = (
-                start_today.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+            start_today_utc = start_today.astimezone(timezone.utc).strftime(
+                "%Y-%m-%dT%H:%M:%S.000Z"
             )
 
         r = self._get(
@@ -238,4 +238,3 @@ class SmaClient:
 
     def close(self) -> None:
         self._http.close()
-

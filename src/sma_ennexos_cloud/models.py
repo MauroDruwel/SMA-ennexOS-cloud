@@ -80,9 +80,7 @@ def parse_weather_data(data: dict[str, Any]) -> WeatherData:
     now_model: WeatherCurrent | None = None
     if isinstance(now_raw, dict):
         raw_icon = now_raw.get("iconId")
-        norm_icon = (
-            normalize_weather_icon_id(raw_icon) if isinstance(raw_icon, int) else None
-        )
+        norm_icon = normalize_weather_icon_id(raw_icon) if isinstance(raw_icon, int) else None
         now_model = WeatherCurrent(
             time=str(now_raw.get("time", "")),
             icon_id=raw_icon,
@@ -96,9 +94,7 @@ def parse_weather_data(data: dict[str, Any]) -> WeatherData:
     tomorrow_model: WeatherTomorrow | None = None
     if isinstance(tomorrow_raw, dict):
         raw_icon = tomorrow_raw.get("iconId")
-        norm_icon = (
-            normalize_weather_icon_id(raw_icon) if isinstance(raw_icon, int) else None
-        )
+        norm_icon = normalize_weather_icon_id(raw_icon) if isinstance(raw_icon, int) else None
         tomorrow_model = WeatherTomorrow(
             date=str(tomorrow_raw.get("date", "")),
             icon_id=raw_icon,
@@ -110,4 +106,3 @@ def parse_weather_data(data: dict[str, Any]) -> WeatherData:
         )
 
     return WeatherData(city=city, now=now_model, tomorrow=tomorrow_model)
-
