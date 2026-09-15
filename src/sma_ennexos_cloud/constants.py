@@ -54,3 +54,7 @@ API_REQUEST_HEADERS = {
     "Sec-Fetch-Mode": "cors",
     "Sec-Fetch-Site": "same-site",
 }
+
+STATUS_PAGE_SUMMARY_URL = "https://sunnyportal.statuspage.io/api/v2/summary.json"
+ENNEXOS_GROUP_ID = "0t5wbfgnxjs4"
+ENNEXOS_LIVE_DATA_COMPONENT_ID = "2vkfhwrgmzqf"

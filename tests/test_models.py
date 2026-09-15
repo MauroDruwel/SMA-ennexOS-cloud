@@ -34,3 +34,18 @@ class TestPlantInfo:
         d = p.to_dict()
         assert d["component_id"] == "123"
         assert d["name"] == "My Plant"
+
+
+class TestPortalStatus:
+    def test_defaults(self):
+        from sma_ennexos_cloud.models import PortalStatus
+
+        s = PortalStatus()
+        assert s.live_data_status == "unknown"
+
+    def test_to_dict(self):
+        from sma_ennexos_cloud.models import PortalStatus
+
+        s = PortalStatus(live_data_status="under_maintenance")
+        d = s.to_dict()
+        assert d["live_data_status"] == "under_maintenance"

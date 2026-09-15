@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from datetime import datetime, timedelta, timezone
 
 import requests
@@ -9,7 +10,10 @@ import requests
 from .auth import login, refresh_access_token
 from .constants import API_BASE, API_REQUEST_HEADERS, BROWSER_HEADERS
 from .exceptions import AuthenticationError
-from .models import EnergyData, PlantInfo, PowerData
+from .models import EnergyData, PlantInfo, PortalStatus, PowerData
+from .status import get_live_data_status
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class SmaClient:
@@ -20,6 +24,7 @@ class SmaClient:
         username: str | None = None,
         password: str | None = None,
         component_id: str | None = None,
+        check_portal_status: bool = False,
     ) -> None:
         self.username = username
         self.password = password
@@ -29,6 +34,8 @@ class SmaClient:
         self.refresh_token: str | None = None
         self.component_id: str | None = str(component_id) if component_id is not None else None
         self._plant_name: str | None = None
+        self.check_portal_status = check_portal_status
+        self._live_data_status: str | None = None
 
     def login(self) -> None:
         if not self.username or not self.password:
@@ -115,6 +122,17 @@ class SmaClient:
             self._plant_name = name
 
     def get_current_power(self) -> PowerData:
+        if self.check_portal_status:
+            try:
+                status = self.get_live_data_status()
+                if status != "operational":
+                    _LOGGER.warning(
+                        "Sunny Portal Live Data is currently '%s'",
+                        status,
+                    )
+            except Exception as err:  # noqa: BLE001
+                _LOGGER.debug("Could not verify live data status: %s", err)
+
         if not self.component_id:
             self.discover_plant()
         r = self._get(
@@ -172,6 +190,28 @@ class SmaClient:
                             timestamp=v.get("time", ""),
                         )
         return EnergyData(wh=0)
+
+    def get_live_data_status(self, force_refresh: bool = False) -> str:
+        """Fetch Live Data status ('operational', 'under_maintenance', etc.)."""
+        if self._live_data_status is None or force_refresh:
+            self._live_data_status = get_live_data_status(session=self._http)
+        return self._live_data_status
+
+    def get_portal_status(self, force_refresh: bool = False) -> PortalStatus:
+        """Fetch PortalStatus with live_data_status."""
+        return PortalStatus(live_data_status=self.get_live_data_status(force_refresh=force_refresh))
+
+    @property
+    def live_data_status(self) -> str | None:
+        """Return the most recently fetched Live Data status."""
+        return self._live_data_status
+
+    @property
+    def portal_status(self) -> PortalStatus | None:
+        """Return the most recently fetched portal status."""
+        if self._live_data_status is not None:
+            return PortalStatus(live_data_status=self._live_data_status)
+        return None
 
     def close(self) -> None:
         self._http.close()

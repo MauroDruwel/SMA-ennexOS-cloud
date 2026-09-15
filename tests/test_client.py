@@ -159,3 +159,38 @@ class TestSmaClient:
         client = SmaClient()
         client.close()
         client.close()
+
+    def test_client_get_live_data_status(self, monkeypatch):
+        client = SmaClient(username="user", password="pass")
+        monkeypatch.setattr(
+            "sma_ennexos_cloud.client.get_live_data_status",
+            lambda session: "under_maintenance",
+        )
+
+        assert client.live_data_status is None
+        status = client.get_live_data_status()
+        assert status == "under_maintenance"
+        assert client.live_data_status == "under_maintenance"
+        assert client.portal_status.live_data_status == "under_maintenance"
+
+    def test_client_check_portal_status_flag(self, monkeypatch):
+        client = SmaClient(
+            username="user",
+            password="pass",
+            component_id="111",
+            check_portal_status=True,
+        )
+        assert client.check_portal_status is True
+
+        monkeypatch.setattr(
+            "sma_ennexos_cloud.client.get_live_data_status",
+            lambda session: "under_maintenance",
+        )
+
+        mock_resp = MagicMock()
+        mock_resp.json.return_value = {"value": 1200.0, "timestamp": "2026-09-12T12:00:00Z"}
+        monkeypatch.setattr(client, "_get", lambda path, **kwargs: mock_resp)
+
+        power = client.get_current_power()
+        assert power.value == 1200.0
+        assert client.live_data_status == "under_maintenance"

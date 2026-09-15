@@ -1,4 +1,5 @@
 """Example usage of the SMA ennexOS library."""
+
 import json
 import sys
 import time
@@ -16,6 +17,12 @@ def main():
 
     plant_name = client.get_plant_name()
     print(f"Plant: {plant_name}", file=sys.stderr)
+
+    status = client.get_portal_status()
+    print(
+        f"Sunny Portal: {status.description} (Live Data: {status.live_data_status})",
+        file=sys.stderr,
+    )
 
     try:
         while True:

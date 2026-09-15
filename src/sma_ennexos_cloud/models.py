@@ -27,3 +27,8 @@ class EnergyData(_ToDictMixin):
 class PlantInfo(_ToDictMixin):
     component_id: str
     name: str = ""
+
+
+@dataclass
+class PortalStatus(_ToDictMixin):
+    live_data_status: str = "unknown"
