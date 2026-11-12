@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 
 import requests
 
@@ -25,6 +26,7 @@ class SmaClient:
         password: str | None = None,
         component_id: str | None = None,
         check_portal_status: bool = False,
+        timezone: str | None = None,
     ) -> None:
         self.username = username
         self.password = password
@@ -34,6 +36,7 @@ class SmaClient:
         self.refresh_token: str | None = None
         self.component_id: str | None = str(component_id) if component_id is not None else None
         self._plant_name: str | None = None
+        self.timezone: str = timezone or "Europe/Brussels"
         self.check_portal_status = check_portal_status
         self._live_data_status: str | None = None
 
@@ -154,15 +157,31 @@ class SmaClient:
         if not self.component_id:
             self.discover_plant()
         r = self._get(f"/plants/{self.component_id}")
-        name = r.json().get("name", str(self.component_id))
+        data = r.json()
+        name = data.get("name", str(self.component_id))
+        if data.get("timezone"):
+            self.timezone = data["timezone"]
         self._plant_name = name
         return name
 
-    def get_daily_energy(self) -> EnergyData:
+    def get_daily_energy(self, plant_timezone: str | None = None) -> EnergyData:
         if not self.component_id:
             self.discover_plant()
-        now = datetime.now(timezone.utc)
-        prev = now - timedelta(days=1)
+
+        tz_str = plant_timezone or self.timezone or "Europe/Brussels"
+        try:
+            tz = ZoneInfo(tz_str)
+        except Exception:
+            tz = ZoneInfo("Europe/Brussels")
+            tz_str = "Europe/Brussels"
+
+        now_local = datetime.now(tz)
+        start_today = datetime.combine(now_local.date(), datetime.min.time(), tz)
+        end_today = datetime.combine(now_local.date() + timedelta(days=1), datetime.min.time(), tz)
+
+        start_utc = start_today.astimezone(timezone.utc)
+        end_utc = end_today.astimezone(timezone.utc)
+
         r = self._post(
             "/measurements/search",
             {
@@ -171,24 +190,29 @@ class SmaClient:
                         "componentId": self.component_id,
                         "channelId": "Measurement.Metering.TotWhOut.Pv",
                         "resolution": "OneDay",
-                        "timezone": "Europe/Brussels",
+                        "timezone": tz_str,
                         "aggregate": "Dif",
                         "multiAggregate": "Sum",
                     }
                 ],
-                "dateTimeBegin": prev.strftime("%Y-%m-%dT22:00:00.000Z"),
-                "dateTimeEnd": now.strftime("%Y-%m-%dT22:00:00.000Z"),
+                "dateTimeBegin": start_utc.strftime("%Y-%m-%dT%H:%M:%S.000Z"),
+                "dateTimeEnd": end_utc.strftime("%Y-%m-%dT%H:%M:%S.000Z"),
             },
         )
         data = r.json()
         for channel in data:
             if channel["channelId"] == "Measurement.Metering.TotWhOut.Pv":
-                for v in channel.get("values", []):
-                    if v.get("value") is not None:
-                        return EnergyData(
-                            wh=v["value"],
-                            timestamp=v.get("time", ""),
-                        )
+                valid_values = [
+                    v for v in channel.get("values", [])
+                    if v.get("value") is not None
+                ]
+                if valid_values:
+                    # Pick the latest non-null value (today)
+                    latest = valid_values[-1]
+                    return EnergyData(
+                        wh=latest["value"],
+                        timestamp=latest.get("time", ""),
+                    )
         return EnergyData(wh=0)
 
     def get_live_data_status(self, force_refresh: bool = False) -> str:
@@ -224,7 +248,11 @@ class SmaClient:
             cid = self.discover_plant()
 
         if start_today_utc is None:
-            now_local = datetime.now().astimezone()
+            try:
+                tz = ZoneInfo(self.timezone)
+                now_local = datetime.now(tz)
+            except Exception:
+                now_local = datetime.now().astimezone()
             start_today = now_local.replace(hour=0, minute=0, second=0, microsecond=0)
             start_today_utc = start_today.astimezone(timezone.utc).strftime(
                 "%Y-%m-%dT%H:%M:%S.000Z"

@@ -110,11 +110,39 @@ class TestSmaClient:
                 "values": [{"value": 15400.0, "time": "2026-09-12T18:00:00Z"}],
             }
         ]
-        monkeypatch.setattr(client, "_post", lambda path, json_body: mock_resp)
+        posted_payload = {}
+
+        def mock_post(path, json_body):
+            posted_payload.update(json_body)
+            return mock_resp
+
+        monkeypatch.setattr(client, "_post", mock_post)
 
         energy = client.get_daily_energy()
         assert energy.wh == 15400.0
         assert energy.timestamp == "2026-09-12T18:00:00Z"
+        assert posted_payload["queryItems"][0]["timezone"] == "Europe/Brussels"
+        assert "dateTimeBegin" in posted_payload
+        assert "dateTimeEnd" in posted_payload
+
+    def test_get_daily_energy_multiple_values_picks_latest(self, monkeypatch):
+        client = SmaClient(username="user", password="pass", component_id="111")
+        mock_resp = MagicMock()
+        # Simulate yesterday + today buckets
+        mock_resp.json.return_value = [
+            {
+                "channelId": "Measurement.Metering.TotWhOut.Pv",
+                "values": [
+                    {"value": 774.0, "time": "2026-11-11T23:00:00Z"},
+                    {"value": 3520.0, "time": "2026-11-12T23:00:00Z"},
+                ],
+            }
+        ]
+        monkeypatch.setattr(client, "_post", lambda path, json_body: mock_resp)
+
+        energy = client.get_daily_energy()
+        assert energy.wh == 3520.0
+        assert energy.timestamp == "2026-11-12T23:00:00Z"
 
     def test_get_daily_energy_empty(self, monkeypatch):
         client = SmaClient(username="user", password="pass", component_id="111")
