@@ -202,10 +202,7 @@ class SmaClient:
         data = r.json()
         for channel in data:
             if channel["channelId"] == "Measurement.Metering.TotWhOut.Pv":
-                valid_values = [
-                    v for v in channel.get("values", [])
-                    if v.get("value") is not None
-                ]
+                valid_values = [v for v in channel.get("values", []) if v.get("value") is not None]
                 if valid_values:
                     # Pick the latest non-null value (today)
                     latest = valid_values[-1]
